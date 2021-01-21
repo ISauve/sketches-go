@@ -258,3 +258,46 @@ func TestConsistentMerge(t *testing.T) {
 		assert.InDeltaSlice(t, quantilesBeforeMerge, quantilesAfterMerge, floatingPointAcceptableError)
 	}
 }
+
+func TestProvidedExample(t *testing.T) {
+	sketch, _ := NewDefaultDDSketch(0.01)
+
+	sketch.Add(1607374726)
+	sketch.Add(0)
+	sketch.Add(-3.1415)
+
+	p0, _ := sketch.GetValueAtQuantile(0)
+	p50, _ := sketch.GetValueAtQuantile(0.5)
+	p99, _ := sketch.GetValueAtQuantile(0.99)
+	p100, _ := sketch.GetValueAtQuantile(1)
+
+	t.Logf("P0: %f, expected -3.1415", p0)
+	t.Logf("P50: %f, expected 0", p50)
+	t.Logf("P99: %f, expected 1607374726", p99)
+	t.Logf("P10: %f, expected 1607374726", p100)
+
+	// Output:
+	// === RUN   TestProvidedExample
+	// ddsketch_test.go:275: P0: -3.158156, expected -3.1415
+	// ddsketch_test.go:276: P50: 0.000000, expected 0
+	// ddsketch_test.go:277: P99: 0.000000, expected 1607374726
+	// ddsketch_test.go:278: P10: 1595824509.087409, expected 1607374726
+}
+
+func TestMedian(t *testing.T) {
+	sketch, _ := NewDefaultDDSketch(0.01)
+
+	sketch.Add(10.0)
+	sketch.Add(20.0)
+
+	p50, _ := sketch.GetValueAtQuantile(0.5)
+	assert.Equal(t, 15.0, p50)
+
+	// === RUN   TestMedian
+	// ddsketch_test.go:289:
+	//     	Error Trace:	ddsketch_test.go:289
+	//     	Error:      	Not equal:
+	//     	            	expected: 15
+	//     	            	actual  : 10.074696689511438
+	//     	Test:       	TestMedian
+}
